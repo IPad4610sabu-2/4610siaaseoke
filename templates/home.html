@@ -19,50 +19,8 @@
     <script src="https://code.jquery.com/jquery-3.5.1.js"></script>
     <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
 </head>
-<body>
-    
-<div id="version-container">
-    <span id="version">v1.0.1</span>
-</div>
 
-<script>
-    // バージョン表示用の要素を取得
-    const versionContainer = document.getElementById("version-container");
-    const versionElement = document.getElementById("version");
-
-    // CSSスタイルを適用
-    versionContainer.style.position = "fixed";
-    versionContainer.style.top = "9px";
-    versionContainer.style.right = "9px";
-    versionContainer.style.padding = "4px";
-
-    versionElement.style.padding = "4px";
-    versionElement.style.color = "white";
-
-    // このインスタンスのバージョン
-    const currentVersion = "v1.0.1";
-
-    // バージョンを比較
-    fetch('https://raw.githubusercontent.com/siawaseok3/slim-2-by-siawaseok/refs/heads/main/version.txt')
-        .then(response => response.text())
-        .then(remoteVersion => {
-            remoteVersion = remoteVersion.trim();
-
-            if (currentVersion === remoteVersion) {
-                versionElement.style.backgroundColor = "green";
-            } else {
-                versionElement.style.backgroundColor = "red";
-            }
-
-            versionElement.textContent = `${currentVersion} (最新: ${remoteVersion})`;
-        })
-        .catch(error => {
-            console.error('Error fetching version:', error);
-            versionElement.style.backgroundColor = "gray";
-            versionElement.textContent = `${currentVersion} (エラー: バージョン取得失敗)`;
-        });
-</script>
-    <span class="no-theme">
+    <body class="no-theme">
         <div class="pure-g h-box" id="search-widget">
             <div class="pure-u-1" id="logo">
                 <h1 href="/" class="pure-menu-heading">Yuki Youtube</h1>
@@ -91,6 +49,6 @@
             }
             xhr.send();
         }},delay:300});</script>
-    </span>
-</body>
+    </body>
+
 </html>
