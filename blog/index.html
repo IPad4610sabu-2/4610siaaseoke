@@ -1,164 +1,454 @@
 <!DOCTYPE html>
 <html lang="ja">
+
 <head>
-    <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/siawaseok3/yuki-bbs-siawaseok/main/views/IMG_9455-modified.png">
-    <link rel="shortcut icon" href="https://raw.githubusercontent.com/siawaseok3/yuki-bbs-siawaseok/main/views/IMG_9455-modified.png" type="image/png">
-    <link rel="apple-touch-icon" sizes="256x256" href="https://raw.githubusercontent.com/siawaseok3/yuki-bbs-siawaseok/main/views/IMG_9455-modified.png">
-    <link rel="apple-touch-icon" sizes="180x180" href="https://raw.githubusercontent.com/siawaseok3/yuki-bbs-siawaseok/main/views/180.png">
-    <link rel="apple-touch-icon" sizes="32x32" href="https://raw.githubusercontent.com/siawaseok3/yuki-bbs-siawaseok/main/views/32.png">
-    <link rel="apple-touch-icon" sizes="16x16" href="https://raw.githubusercontent.com/siawaseok3/yuki-bbs-siawaseok/main/views/16.png">
-    <link rel="stylesheet" href="styles.css">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>幸せok改造インスタンス</title>
+    <title>Document</title>
     <style>
+        /* 背景画像のスタイル */
         body {
-            font-family: Arial, sans-serif;
+            background-image: url('https://th.bing.com/th/id/OIG2.Wnln.UlFDTVAyzs4L3a2?pid=ImgGn');
+            background-size: cover;
+            background-position: center;
             margin: 0;
-            padding: 0;
-            background-color: #f0f8ff; 
+            font-family: Arial, sans-serif;
         }
-        header {
-            background-color: #87ceeb; 
+
+        .large-text {
+            font-size: 48px;
+            font-weight: bold;
+            text-align: center;
             color: white;
-            text-align: center;
-            padding: 1em 0;
+            margin-top: 20px;
         }
-        nav {
-            background: #ffeb3b; 
-            color: black;
-            padding: 1em;
-            text-align: center;
-        }
-        nav a {
-            color: black;
-            margin: 0 15px;
-            text-decoration: none;
-        }
-        main {
-            padding: 20px;
-        }
-        .topic {
-            background: white;
-            margin: 20px 0;
-            padding: 15px;
+
+        /* ボタンのスタイル */
+        #followButton,
+        #aboutBlankButton,
+        #emergencyButton {
+            display: block;
+            margin: 20px auto;
+            padding: 10px 20px;
+            font-size: 24px;
+            font-weight: bold;
+            color: white;
+            border: none;
             border-radius: 5px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+            transition: background-color 0.3s;
         }
-        footer {
-            background: #87ceeb;
-            color: white;
-            text-align: center;
-            padding: 0.5em 0;
+
+        /* ボタンのホバースタイル */
+        #followButton:hover {
+            background-color: #0056b3;
+        }
+
+        #aboutBlankButton {
+            background-color: #28a745;
+        }
+
+        #aboutBlankButton:hover {
+            background-color: #218838;
+        }
+
+        #emergencyButton {
+            background-color: #dc3545;
+        }
+
+        #emergencyButton:hover {
+            background-color: #c82333;
+        }
+
+        .blog-section {
+            background-color: rgba(255, 255, 255, 0.9);
+            padding: 20px;
+            margin: 20px;
+            border-radius: 10px;
+        }
+
+        .comments {
+            margin-top: 20px;
+        }
+
+        .comment {
+            border-bottom: 1px solid #ccc;
+            padding: 5px 0;
+            position: relative;
+        }
+
+        .reaction-buttons {
+            position: absolute;
+            right: 0;
+            top: 0;
+        }
+
+        .reaction-button {
+            cursor: pointer;
+            margin-left: 10px;
+            background: transparent;
+            border: none;
+            color: #007bff;
+            font-size: 18px;
+        }
+
+        .reaction-count {
+            display: inline-block;
+            margin-left: 5px;
+        }
+
+        .hidden-comments {
+            display: none;
+        }
+
+        #showMoreButton {
+            margin-top: 10px;
+            padding: 10px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        .fullscreen-overlay {
             position: fixed;
+            top: 0;
+            left: 0;
             width: 100%;
-            bottom: 0;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            display: none;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .close-button {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            font-size: 24px;
+            color: white;
+            cursor: pointer;
         }
     </style>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.21.0/firebase-app.js";
+        import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, onSnapshot, updateDoc } from "https://www.gstatic.com/firebasejs/9.21.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBYO7lc3tTKdNlK1wLjTTpneQL-zkYU3uA",
+            authDomain: "chatapp-by-kbk.firebaseapp.com",
+            databaseURL: "https://chatapp-by-kbk-default-rtdb.firebaseio.com",
+            projectId: "chatapp-by-kbk",
+            storageBucket: "chatapp-by-kbk.appspot.com",
+            messagingSenderId: "254822225505",
+            appId: "1:254822225505:web:1d8121702659a448fa7c20",
+            measurementId: "G-ZPDHPNGVSN"
+        };
+
+        // Firebaseの初期化
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const blockedUsers = new Set();
+            const blockOverlay = document.createElement('div');
+            blockOverlay.classList.add('block-overlay');
+            const blockText = document.createElement('div');
+            blockText.classList.add('block-message-large');
+            blockText.textContent = "あなたのIPアドレスはブロックされました。";
+            blockOverlay.appendChild(blockText);
+            document.body.appendChild(blockOverlay);
+
+            const generateUserId = () => {
+                const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+                let userId = '';
+                for (let i = 0; i < 8; i++) {
+                    userId += characters.charAt(Math.floor(Math.random() * characters.length));
+                }
+                return userId;
+            };
+
+            let userId = generateUserId();
+            console.log("ユーザーID:", userId);
+
+            document.getElementById('followButton').onclick = async function () {
+                const newUrl = 'https://neon.go4it.com.mx/';
+                try {
+                    const response = await fetch(newUrl, {
+                        method: 'HEAD',
+                        credentials: 'include'
+                    });
+
+                    if (response.ok) {
+                        window.location.href = newUrl;
+                    } else {
+                        alert("ページを読み込めませんでした: " + response.statusText);
+                    }
+                } catch (error) {
+                    console.error("Error fetching new URL:", error);
+                }
+            };
+
+            function openAboutBlank() {
+                const currentUrl = window.location.href;
+                const aboutBlankWindow = window.open('about:blank', '_blank');
+                const content = `
+                    <html>
+                        <head>
+                            <title>Embedded Site</title>
+                            <style>
+                                body { margin: 0; }
+                                iframe { width: 100vw; height: 100vh; border: none; }
+                            </style>
+                        </head>
+                        <body>
+                            <iframe src="${currentUrl}" allowfullscreen></iframe>
+                        </body>
+                    </html>
+                `;
+                setTimeout(() => {
+                    aboutBlankWindow.document.write(content);
+                    aboutBlankWindow.document.close();
+                }, 100);
+            }
+
+            document.getElementById('aboutBlankButton').onclick = openAboutBlank;
+            const commentInput = document.getElementById('commentInput');
+            const nameInput = document.getElementById('nameInput');
+            const submitCommentButton = document.getElementById('submitComment');
+            const commentList = document.getElementById('commentList');
+            const showMoreButton = document.getElementById('showMoreButton');
+            const passwordInput = document.getElementById('passwordInput');
+            const deleteCommentsButton = document.getElementById('deleteCommentsButton');
+            const emergencyButton = document.getElementById('emergencyButton');
+
+            let allComments = [];
+            let commentsVisible = 3;
+            const password = 'https://youtube.com'; //クリック関数
+
+            submitCommentButton.onclick = async function () {
+                const name = nameInput.value.trim();
+                const comment = commentInput.value.trim();
+
+                if (!name || !comment) {
+                    alert('名前とコメントを入力してください。');
+                    return;
+                }
+
+                if (name.length > 30) {
+                    alert('名前は30文字以内で入力してください。');
+                    return;
+                }
+
+                if (comment.length > 200) {
+                    alert('コメントは200文字以内で入力してください。');
+                    return;
+                }
+
+                if (name.includes('主') || name.includes('管理者')) {
+                    alert('「主」または「管理者」という名前は使用できません。他の名前を入力してください。');
+                    return;
+                }
+
+                // ブロックされたユーザーのチェック
+                if (blockedUsers.has(name)) {
+                    blockOverlay.style.display = 'flex';
+                    requestFullscreen(blockOverlay);
+                    return;
+                }
+
+                const now = Date.now();
+
+                const newCommentRef = await addDoc(collection(db, "comments"), {
+                    name: name,
+                    userId: userId,
+                    comment: comment,
+                    timestamp: now,
+                    likes: 0,
+                    anger: 0
+                });
+
+                allComments.push({ name, comment, timestamp: now, id: newCommentRef.id, userId: userId, likes: 0, anger: 0 });
+                updateCommentDisplay();
+
+                // コメントが50件を超えた場合の削除
+                if (allComments.length >= 50) {
+                    await deleteAllComments();
+                }
+
+                // コメント送信後にコメント入力フィールドをクリア
+                commentInput.value = '';
+            };
+
+            async function deleteAllComments() {
+                const commentsSnapshot = await getDocs(collection(db, "comments"));
+                const deletePromises = commentsSnapshot.docs.map(doc => deleteDoc(doc.ref));
+                await Promise.all(deletePromises);
+                alert('コメントが50件を超えたため、すべてのコメントが削除されました。');
+                updateCommentDisplay();
+            }
+
+            onSnapshot(collection(db, "comments"), async (snapshot) => {
+                allComments = [];
+
+                for (const doc of snapshot.docs) {
+                    const data = doc.data();
+                    allComments.push({ ...data, id: doc.id });
+                }
+
+                allComments.sort((a, b) => b.timestamp - a.timestamp);
+                updateCommentDisplay();
+
+                if (allComments.length > commentsVisible) {
+                    showMoreButton.classList.remove('hidden-comments');
+                } else {
+                    showMoreButton.classList.add('hidden-comments');
+                }
+            });
+
+            showMoreButton.onclick = () => {
+                commentsVisible = allComments.length;
+                updateCommentDisplay();
+                showMoreButton.classList.add('hidden-comments');
+            };
+
+            deleteCommentsButton.onclick = async function () {
+                const inputPassword = passwordInput.value.trim();
+
+                if (checkPassword(inputPassword)) {
+                    await deleteAllComments();
+                    passwordInput.value = '';
+                    alert('全てのコメントを削除しました。');
+                } else {
+                    alert('無効なパスワードです。');
+                }
+            };
+
+            function checkPassword(inputPassword) {
+                return inputPassword === password;
+            }
+
+            emergencyButton.onclick = async function () {
+                const emergencyPassword = prompt("パスワードを入力してください：");
+                if (checkPassword(emergencyPassword)) {
+                    const deleteInterval = setInterval(async () => {
+                        const commentsSnapshot = await getDocs(collection(db, "comments"));
+                        if (commentsSnapshot.size > 0) {
+                            await deleteAllComments();
+                        }
+                    }, 1000);
+
+                    setTimeout(() => {
+                        clearInterval(deleteInterval);
+                        alert('非常用機能が終了しました。');
+                    }, 120000);
+                } else {
+                    alert('無効なパスワードです。');
+                }
+            };
+
+            function updateCommentDisplay() {
+                commentList.innerHTML = '';
+                const commentsToDisplay = allComments.slice(0, commentsVisible);
+
+                commentsToDisplay.forEach((data) => {
+                    const newComment = document.createElement('div');
+                    newComment.classList.add('comment');
+                    newComment.textContent = `${data.name} (認証: ${data.userId}): ${data.comment}`;
+
+                    const timestamp = new Date(data.timestamp).toLocaleString();
+                    const timestampElement = document.createElement('div');
+                    timestampElement.classList.add('timestamp');
+                    timestampElement.textContent = `投稿日: ${timestamp}`;
+
+                    const reactionButtons = document.createElement('div');
+                    reactionButtons.classList.add('reaction-buttons');
+
+                    const likeButton = document.createElement('button');
+                    likeButton.classList.add('reaction-button');
+                    likeButton.textContent = '👍';
+                    likeButton.onclick = async () => {
+                        data.likes++;
+                        await updateDoc(doc(db, "comments", data.id), { likes: data.likes });
+                        updateCommentDisplay();
+                    };
+
+                    const angerButton = document.createElement('button');
+                    angerButton.classList.add('reaction-button');
+                    angerButton.textContent = '😡';
+                    angerButton.onclick = async () => {
+                        data.anger++;
+                        await updateDoc(doc(db, "comments", data.id), { anger: data.anger });
+                        updateCommentDisplay();
+                    };
+
+                    const likeCount = document.createElement('span');
+                    likeCount.classList.add('reaction-count');
+                    likeCount.textContent = `(${data.likes})`;
+
+                    const angerCount = document.createElement('span');
+                    angerCount.classList.add('reaction-count');
+                    angerCount.textContent = `(${data.anger})`;
+
+                    reactionButtons.appendChild(likeButton);
+                    reactionButtons.appendChild(likeCount);
+                    reactionButtons.appendChild(angerButton);
+                    reactionButtons.appendChild(angerCount);
+
+                    newComment.appendChild(reactionButtons);
+                    newComment.appendChild(timestampElement);
+                    commentList.appendChild(newComment);
+                });
+            }
+
+            function requestFullscreen(element) {
+                if (element.requestFullscreen) {
+                    element.requestFullscreen();
+                } else if (element.mozRequestFullScreen) {
+                    element.mozRequestFullScreen();
+                } else if (element.webkitRequestFullscreen) {
+                    element.webkitRequestFullscreen();
+                } else if (element.msRequestFullscreen) {
+                    element.msRequestFullscreen();
+                }
+            }
+
+            blockOverlay.addEventListener('click', () => {
+                blockOverlay.style.display = 'none';
+                document.exitFullscreen();
+            });
+        });
+    </script>
 </head>
+
 <body>
 
-<header>
-    <h1>因数分解と展開の解説！</h1>
-</header>
+    <div class="large-text">made by minotaur</div>
 
-<nav>
-    <a href="#factorization">因数分解</a>
-    <a href="#expansion">展開</a>
-</nav>
+    <button id="followButton">proxy_minotaurをフォロー</button>
+    <button id="aboutBlankButton">about:blankを開く</button>
+    <button id="emergencyButton">主専用　コメント欄を閉鎖</button>
 
-<main>
-    <section id="factorization" class="topic">
-        <h2>因数分解</h2>
-        <p>因数分解は、多項式を積の形に書き換える操作です。以下に簡単な問題と難しい問題の2つの例を示します。</p>
-        <h3>例題1</h3>
-        <p>例: x^2 - 4</p>
-        <p>解: これは平方差の公式を使って (x - 2)(x + 2) に因数分解できます。</p>
-        <h3>例題2</h3>
-        <p>例: x^2 - 5x + 6</p>
-        <p>解: 因数分解を用いて解くと、(x - 2)(x - 3) となります。したがって、x = 2 または x = 3 となります。</p>
-        <h3>問題</h3>
-        <h4>① (x-3)(x-1)(x+5)(x+7) - 960</h4>
-        <p>解: まず展開して整理します。</p>
-        <p>(x-3)(x-1) = x^2 - 4x + 3</p>
-        <p>(x+5)(x+7) = x^2 + 12x + 35</p>
-        <p>次に、これらを掛け合わせます。</p>
-        <p>(x^2 - 4x + 3)(x^2 + 12x + 35)</p>
-        <p>これを展開すると、x^4 + 8x^3 - 13x^2 - 132x + 105 になります。</p>
-        <p>最後に、960を引きます。</p>
-        <p>x^4 + 8x^3 - 13x^2 - 132x + 105 - 960 = x^4 + 8x^3 - 13x^2 - 132x - 855</p>
-        <p>最終的な因数分解は x^4 + 8x^3 - 13x^2 - 132x - 855 です。</p>
+    <div class="blog-section">
+        <h2>ブログセクション</h2>
+        <p>ここでは、さまざまな内容について話し合ったり、意見を共有したりできます。お気軽にコメントを残してください！proxy_minotaurをフォローというボタンを押すとYUKIに飛びます。荒らしできなくしました。楽しくやってください。荒らし、卑劣な表現、スパムなどはこのサーバーで禁止します。コメントの削除パスワードは管理者になると教えます。scratchスタジオに来てください。<a href="https://scratch.mit.edu/studios/35713963/">こちら</a>によく僕の偽物がいますが(主）って書いてあるのが本物です。（なりすまし対策）。ここからよく読んでください→コメントの削除用パスワードを知っている人は管理者とみなし、名前の後にパスワードを入力すると(管理者)と表示させるプログラムをつくりました。またIPアドレスのブロック機能をつけました。荒らしをすると即IPバンされます。仲良くしてください。多分、htmlコードをハッキングなどして、（主）と表示させている人がいますがそこまでの技術があれば荒らしをしないと信じ、表示させることを許可します。</p>
+        <div class="comments">
+            <input type="text" id="nameInput" placeholder="名前を入力" />
+            <textarea id="commentInput" placeholder="コメントを入力" rows="4"></textarea>
 
-        <h4>② a^2 - b^2 - 4c^2 - 6a + 4bc + 9</h4>
-        <p>解: 整理して因数分解します。</p>
-        <p>まず、a^2 - 6a + 9 は (a - 3)^2 になります。</p>
-        <p>次に、b^2 - 4bc + 4c^2 は (b - 2c)^2 になります。</p>
-        <p>したがって、全体を因数分解すると (a - 3)^2 - (b - 2c)^2 になります。</p>
-        <p>これを平方差の公式を使って因数分解します。</p>
-        <p>(a - 3 + b - 2c)(a - 3 - b + 2c)</p>
+            <button id="submitComment">コメントを送信</button>
+            <div id="commentList"></div>
+            <button id="showMoreButton" class="hidden-comments">すべて表示</button>
 
-        <h4>③ (x^2 - 15x) + (x^2 - 225)</h4>
-        <p>解: まず共通因数を見つけます。</p>
-        <p>x^2 - 15x + x^2 - 225 = 2x^2 - 15x - 225</p>
-        <p>これをさらに因数分解します。</p>
-        <p>2(x^2 - 7.5x - 112.5) = 2(x - 15)(x + 7.5)</p>
-
-        <h4>④ x^4(2x - 3y) + 27(9y - 6x)</h4>
-        <p>解: まず共通因数を見つけます。</p>
-        <p>27 を factor out します。</p>
-        <p>x^4(2x - 3y) - 27(6x - 9y) = x^4(2x - 3y) - 27(3(2x - 3y))</p>
-        <p>共通因数 (2x - 3y) を factor out します。</p>
-        <p>(2x - 3y)(x^4 - 27)</p>
-    </section>
-
-    <section id="expansion" class="topic">
-        <h2>展開</h2>
-        <p>展開は、多項式の積を和の形に書き換える操作です。以下に簡単な問題と難しい問題の2つの例を示します。</p>
-        <h3>例題1</h3>
-        <p>例: (x + 2)(x + 3)</p>
-        <p>解: これは分配法則を使って x^2 + 5x + 6 に展開できます。</p>
-        <h3>例題2</h3>
-        <p>例: (2x - 3)(x + 4)</p>
-        <p>解: これも分配法則を使って 2x^2 + 8x - 3x - 12 = 2x^2 + 5x - 12 に展開できます。</p>
-        <h3>問題</h3>
-        <h4>① (x-3)(x-1)(x+5)(x+7) - 960 を展開し因数分解を再度行います。</h4>
-        <p>解: (x-3)(x-1) = x^2 - 4x + 3</p>
-        <p>(x+5)(x+7) = x^2 + 12x + 35</p>
-        <p>これを掛け合わせて、展開します。</p>
-        <p>(x^2 - 4x + 3)(x^2 + 12x + 35) = x^4 + 8x^3 - 13x^2 - 132x + 105</p>
-        <p>最後に960を引いて再因数分解します。</p>
-        <p>x^4 + 8x^3 - 13x^2 - 132x - 855</p>
-
-        <h4>② a^2 - b^2 - 4c^2 - 6a + 4bc + 9 を展開し、同様に因数分解を行います。</h4>
-        <p>解: a^2 - 6a + 9 は (a-3)^2 です。</p>
-        <p>b^2 - 4bc + 4c^2 は (b-2c)^2 です。</p>
-        <p>平方差の公式を使って因数分解します。</p>
-        <p>(a-3)^2 - (b-2c)^2 = (a-3+b-2c)(a-3-b+2c)</p>
-
-        <h4>③ (x^2 - 15x) + (x^2 - 225) を展開して簡単化します。</h4>
-        <p>解: x^2 - 15x + x^2 - 225 = 2x^2 - 15x - 225</p>
-        <p>さらに因数分解します。</p>
-        <p>2(x^2 - 7.5x - 112.5) = 2(x-15)(x+7.5)</p>
-
-        <h4>④ x^4(2x - 3y) + 27(9y - 6x) を展開して整理します。</h4>
-        <p>解: まず共通因数を見つけます。</p>
-        <p>x^4(2x - 3y) - 27(6x - 9y)</p>
-        <p>27 を factor out します。</p>
-        <p>x^4(2x - 3y) - 27(3(2x - 3y))</p>
-        <p>共通因数 (2x - 3y) を factor out します。</p>
-        <p>(2x - 3y)(x^4 - 27)</p>
-    </section>
-</main>
-
-<footer>
-    <p>&copy; 2024 因数分解と展開の解説　<font size="2px">幸せならokです！</font></p>
-</footer>
-    <!-- Cookieの承認 -->
-    <div id="cookie-notice" class="cookie-notice">
-        このサイトではクッキーを使用しています。<br>
-        <button id="accept-btn">承認する</button>
-        <button id="reject-btn">拒否する</button>
+            <!-- 削除用のセクション -->
+            <div class="delete-section">
+                <input type="password" id="passwordInput" placeholder="パスワードを入力" />
+                <button id="deleteCommentsButton">コメントを削除</button>
+            </div>
+        </div>
     </div>
-    <script src="script.js"></script>
+
 </body>
+
 </html>
+</div> </div>  </body> </html>  <html lang="ja"> <head> </div> <script src="script.js"></script> </body> </html>
