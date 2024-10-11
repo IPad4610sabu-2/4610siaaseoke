@@ -9,12 +9,9 @@ import subprocess
 from cache import cache
 
 
-max_api_wait_time = 6
+max_api_wait_time = 3
 max_time = 10
-apis = [
-    r"https://invidious.jing.rocks/",
-    r"https://invidious.nerdvpn.de/",
-]
+apis = [r"http://invidious.materialio.us/",r"https://invidious.materialio.us/",r"http://yewtu.be/",r"https://iv.datura.network/",r"https://invidious.private.coffee/",r"https://invidious.protokolla.fi/",r"https://invidious.perennialte.ch/",r"https://yt.cdaut.de/",r"https://invidious.materialio.us/",r"https://yewtu.be/",r"https://invidious.fdn.fr/",r"https://inv.tux.pizza/",r"https://invidious.privacyredirect.com/",r"https://invidious.drgns.space/",r"https://vid.puffyan.us",r"https://invidious.jing.rocks/",r"https://youtube.076.ne.jp/",r"https://vid.puffyan.us/",r"https://inv.riverside.rocks/",r"https://invidio.xamh.de/",r"https://y.com.sb/",r"https://invidious.sethforprivacy.com/",r"https://invidious.tiekoetter.com/",r"https://inv.bp.projectsegfau.lt/",r"https://inv.vern.cc/",r"https://invidious.nerdvpn.de/",r"https://inv.privacy.com.de/",r"https://invidious.rhyshl.live/",r"https://invidious.slipfox.xyz/",r"https://invidious.weblibre.org/",r"https://invidious.namazso.eu/",r"https://invidious.jing.rocks"]
 url = requests.get(r'https://raw.githubusercontent.com/mochidukiyukimi/yuki-youtube-instance/main/instance.txt').text.rstrip()
 version = "1.0"
 
@@ -35,7 +32,47 @@ def is_json(json_str):
         pass
     return result
 
+def apirequest(url):
+    global apis
+    global max_time
+    starttime = time.time()
+    for api in apis:
+        if  time.time() - starttime >= max_time -1:
+            break
+        try:
+            res = requests.get(api+url,timeout=max_api_wait_time)
+            if res.status_code == 200 and is_json(res.text):
+                return res.text
+            else:
+                print(f"エラー:{api}")
+                apis.append(api)
+                apis.remove(api)
+        except:
+            print(f"タイムアウト:{api}")
+            apis.append(api)
+            apis.remove(api)
+    raise APItimeoutError("APIがタイムアウトしました")
 
+def apichannelrequest(url):
+    global apichannels
+    global max_time
+    starttime = time.time()
+    for api in apichannels:
+        if  time.time() - starttime >= max_time -1:
+            break
+        try:
+            res = requests.get(api+url,timeout=max_api_wait_time)
+            if res.status_code == 200 and is_json(res.text):
+                return res.text
+            else:
+                print(f"エラー:{api}")
+                apichannels.append(api)
+                apichannels.remove(api)
+        except:
+            print(f"タイムアウト:{api}")
+            apichannels.append(api)
+            apichannels.remove(api)
+    raise APItimeoutError("APIがタイムアウトしました")
 
 def apicommentsrequest(url):
     global apicomments
@@ -58,49 +95,6 @@ def apicommentsrequest(url):
             apicomments.remove(api)
     raise APItimeoutError("APIがタイムアウトしました")
 
-def apirequest(url):
-    global apis
-    global max_time
-    starttime = time.time()
-    for api in apis:
-        if time.time() - starttime >= max_time - 1:
-            break
-        try:
-            res = requests.get(api + url, timeout=max_api_wait_time)
-            if res.status_code == 200 and is_json(res.text):
-                print(f"成功したAPI: {api}")  # APIのリンクをログに出力
-                return res.text
-            else:
-                print(f"エラー: {api}")
-                apis.append(api)
-                apis.remove(api)
-        except:
-            print(f"タイムアウト: {api}")
-            apis.append(api)
-            apis.remove(api)
-    raise APItimeoutError("APIがタイムアウトしました")
-
-def apichannelrequest(url):
-    global apichannels
-    global max_time
-    starttime = time.time()
-    for api in apichannels:
-        if time.time() - starttime >= max_time - 1:
-            break
-        try:
-            res = requests.get(api + url, timeout=max_api_wait_time)
-            if res.status_code == 200 and is_json(res.text):
-                print(f"成功したAPI: {api}")  # APIのリンクをログに出力
-                return res.text
-            else:
-                print(f"エラー: {api}")
-                apichannels.append(api)
-                apichannels.remove(api)
-        except:
-            print(f"タイムアウト: {api}")
-            apichannels.append(api)
-            apichannels.remove(api)
-    raise APItimeoutError("APIがタイムアウトしました")
 
 def get_info(request):
     global version
@@ -147,7 +141,7 @@ def get_comments(videoid):
 def get_replies(videoid,key):
     t = json.loads(apicommentsrequest(fr"api/v1/comments/{videoid}?hmac_key={key}&hl=jp&format=html"))["contentHtml"]
 
-def get_level(yuki):
+def get_level(siawaseok):
     for i1 in range(1,13):
         with open(f'Level{i1}.txt', 'r', encoding='UTF-8', newline='\n') as f:
             if siawaseok in [i2.rstrip("\r\n") for i2 in f.readlines()]:
@@ -186,7 +180,7 @@ from typing import Union
 
 app = FastAPI(docs_url=None, redoc_url=None, openapi_url=None)
 app.mount("/css", StaticFiles(directory="./css"), name="static")
-app.mount("/yuki", StaticFiles(directory="./blog", html=True), name="static")
+app.mount("/siawaseok", StaticFiles(directory="./blog", html=True), name="static")
 app.add_middleware(GZipMiddleware, minimum_size=1000)
 
 from fastapi.templating import Jinja2Templates
@@ -203,7 +197,7 @@ def home(response: Response,request: Request,yuki: Union[str] = Cookie(None)):
         response.set_cookie("yuki","True",max_age=60 * 60 * 24 * 7)
         return template("home.html",{"request": request})
     print(check_cokie(yuki))
-    return redirect("/yuki")
+    return redirect("/siawaseok")
 
 @app.get('/watch', response_class=HTMLResponse)
 def video(v:str,response: Response,request: Request,yuki: Union[str] = Cookie(None),proxy: Union[str] = Cookie(None)):
